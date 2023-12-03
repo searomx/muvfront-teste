@@ -22,7 +22,8 @@ export default function App() {
 
 	useEffect(() => {
 		loadCustomers();
-	}, []);
+	}, [customers]);
+
 	async function loadCustomers() {
 		const response = await api.get("/customers");
 		setCustomers(response.data);
@@ -54,27 +55,31 @@ export default function App() {
 		if (!alterar) {
 			const response = await api.post("/customer", data);
 			setCustomers([...customers, response.data]);
+			handleReset();
 		} else {
-			const response = await api.put("/customer", data);
-			setCustomers([...customers, response.data]);
+			onUpdate();
+			handleReset();
 			toggleAlterar();
-			console.log(response.data);
 		}
 
 		handleReset();
 	}
 
-	async function onUpdate(id: string) {
+	async function onUpdate() {
+		const codigo = codigoRef.current?.value.trim();
+		const name = nameRef.current?.value;
+		const email = emailRef.current?.value;
+		const password = passwordRef.current?.value;
+
+		const data = {
+			id: codigo,
+			nome: name,
+			email: email,
+			password: password,
+		};
+
 		try {
-			await api.put("/customer", {
-				params: {
-					id: id,
-				},
-			});
-			const filteredCustomers = customers.filter(
-				(customer) => customer.id !== id
-			);
-			setCustomers(filteredCustomers);
+			await api.put("/customer", data);
 		} catch (error) {
 			console.log(error);
 		}
@@ -128,6 +133,7 @@ export default function App() {
 							type='text'
 							id='codigo'
 							ref={codigoRef}
+							disabled={alterar}
 							className='p-2 rounded-md bg-gray-800 text-white'
 							placeholder='Digite o código do cliente'
 						/>
@@ -137,6 +143,7 @@ export default function App() {
 						<input
 							type='text'
 							id='nome'
+							name='nome'
 							ref={nameRef}
 							className='p-2 rounded-md bg-gray-800 text-white'
 							placeholder='Digite o nome do cliente'
@@ -174,7 +181,7 @@ export default function App() {
 							type='submit'
 							value={alterar ? "Alterar" : "Cadastrar"}
 							className={`mt-5 p-2 rounded-md font-medium bg-green-500 text-white 
-									cursor-pointer hover:bg-green-600 
+									cursor-pointer hover:bg-green-960 
 									transition-all duration-200`}
 						/>
 					</form>
@@ -185,22 +192,22 @@ export default function App() {
 								className={`w-full bg-gray-800 
 										rounded-md p-4 text-white 
 										font-medium relative cursor-pointer 
-										hover:scale-105 duration-200 hover:bg-slate-600`}>
+										hover:scale-105 duration-200 hover:bg-slate-960`}>
 								<p className='flex w-full'>
 									<span className='flex w-20'>Código:</span>
-									<span className='flex w-60'>{cliente.id}</span>
+									<span className='flex w-96'>{cliente.id}</span>
 								</p>
 								<p className='flex w-full'>
 									<span className='flex w-20'>Nome:</span>
-									<span className='flex w-60'>{cliente.nome}</span>
+									<span className='flex w-96'>{cliente.nome}</span>
 								</p>
 								<p className='flex w-full'>
 									<span className='flex w-20'>Email:</span>
-									<span className='flex w-60'>{cliente.email}</span>
+									<span className='flex w-96'>{cliente.email}</span>
 								</p>
 								<p className='flex w-full'>
 									<span className='flex w-20'>Senha:</span>
-									<span className='flex w-60'>{cliente.password}</span>
+									<span className='flex w-96'>{cliente.password}</span>
 								</p>
 
 								<button
